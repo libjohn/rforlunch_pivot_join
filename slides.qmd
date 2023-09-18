@@ -1,0 +1,62 @@
+---
+title: "Pivot and Join"
+subtitle: 'Part 1 of how tidy data for functional programming and iteration'
+author: 
+  name: "John Little"
+  orcid: 0000-0002-3600-0972
+  affiliation:
+    - name: Duke University Libraries
+      department: Center for Data & Visualization Sciences
+      city: Durham
+      state: NC
+      country: US
+      url:  https://library.duke.edu/data
+institute: "Center for Data & Visualization Sciences"
+date: today
+
+format: 
+  revealjs:
+    theme: moon
+    self-contained: true  
+    footer:  "[John R Little](https://JohnLittle.info) ● [Center for Data & Visualization Sciences](https://library.duke.edu/data/) ● [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)"
+    logo: images/rfun_logo.png
+license: "CC BY"
+editor: visual
+---
+
+## Tidydata[^1] {background-image="images/tidy_data.png" background-size="contain" background-repeat="false"}
+
+[^1]: A robust discussion of *tidy data* can be found in *R for Data Science* ([Wickham, Çetinkaya-Rundel, and Grolemund 2023](https://intro2r.library.duke.edu/longer_wider#ref-wickham2023))*: [https://r4ds.had.co.nz/tidy-data.html](https://r4ds.had.co.nz/tidy-data.htmlhttps://r4ds.had.co.nz/tidy-data.html)*
+
+## Wide data
+
+```{r}
+#| message: false
+#| warning: false
+#| code-line-numbers: "4"
+#| echo: true
+#| code-fold: true
+library(tidyverse)
+library(gt)
+
+tidyr::relig_income |> 
+  gt::gt_preview() |> 
+  gtExtras::gt_theme_dark()
+```
+
+## Tall data
+
+after `tidyr::pivot_longer()`
+
+```{r}
+#| code-line-numbers: 2-4
+#| echo: true
+#| code-fold: true
+relig_income |> 
+  pivot_longer(cols = -religion, 
+               names_to = "income_category", 
+               values_to = "income") |> 
+  gt::gt_preview() |> 
+  gtExtras::gt_theme_dark()
+
+```
