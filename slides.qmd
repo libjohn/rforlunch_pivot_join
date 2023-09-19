@@ -102,7 +102,7 @@ relig_income |>
 #| code-line-numbers: "2,5|3-4"
 relig_income |> 
   pivot_longer(cols = -religion, names_to = "income_category") |> 
-  ggplot(aes(income, income_category)) +
+  ggplot(aes(value, income_category)) +
   geom_col() +
   facet_wrap(vars(religion))
 ```
@@ -345,7 +345,6 @@ bind_cols(nomatch_favrating, nomatch_starwars) |>
   )
 ```
 
-- numeric keys are the best match keys
-- natural language keys are not good match keys
-- regular expressions can normalize keys to some extent
-
+-   numeric keys are the best match keys
+-   natural language keys are not good match keys
+-   regular expressions can normalize keys to some extent
