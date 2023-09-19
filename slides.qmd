@@ -161,7 +161,11 @@ fav_ratings  |>
 dplyr::starwars |> 
   select(name, height, mass, gender, homeworld) |> 
   gt::gt_preview(top_n = 8) |> 
-  gtExtras::gt_theme_dark()
+  gtExtras::gt_theme_dark() |> 
+  data_color(
+    columns = c(name, height, mass, gender, homeworld),
+    palette = "#AFC366"
+  ) 
 ```
 :::
 
@@ -171,7 +175,11 @@ dplyr::starwars |>
 ```{r}
 readr::read_csv("data/538_favorability_popularity.csv", skip = 11) |> 
   gt::gt_preview(top_n = 8) |> 
-  gtExtras::gt_theme_dark()  
+  gtExtras::gt_theme_dark() |> 
+    data_color(
+    columns = c(name, fav_rating),
+    palette = "#D77D4C"
+  ) 
 ```
 :::
 :::
@@ -180,9 +188,8 @@ readr::read_csv("data/538_favorability_popularity.csv", skip = 11) |>
 ::: {.column width="50%"}
 :::
 
-::: {.column width="50%" style="text-align: right; font-size: 30%; color: dimgray;" }
-Data gathered then transformed from<br>
-https://github.com/fivethirtyeight/data/tree/master/star-wars-survey
+::: {.column width="50%" style="text-align: right; font-size: 30%; color: dimgray;"}
+Data gathered then transformed from<br> https://github.com/fivethirtyeight/data/tree/master/star-wars-survey
 :::
 :::
 
@@ -191,7 +198,6 @@ https://github.com/fivethirtyeight/data/tree/master/star-wars-survey
 ```{r}
 fav_ratings <- readr::read_csv("data/538_favorability_popularity.csv", skip = 11) 
 ```
-
 
 ::: columns
 ::: {.column width="45%"}
@@ -215,8 +221,131 @@ fav_ratings |>
   dplyr::left_join(starwars, join_by(name)) |> 
   select(name, fav_rating, height, mass, gender, homeworld) |> 
   gt::gt() |> 
-  gtExtras::gt_theme_dark() 
+  data_color(
+    columns = fav_rating,
+    palette = "#D77D4C"
+  ) |> 
+  data_color(
+    columns = c(height, mass, gender, homeworld),
+    palette = "#AFC366"
+  ) |> 
+  data_color(
+    columns = "name",
+    palette = "#6A57C1"
+  ) |> 
+  tab_spanner(
+    label = "Target data-frame",
+    columns = c(height, mass, gender, homeworld),
+    id = "sw_target"
+  ) |> 
+  tab_style(
+    style = cell_fill(color = "#AFC366"), 
+    locations = cells_column_spanners(spanners = "sw_target")
+  ) |> 
+  tab_style(
+    style = cell_text(color = "black"),
+    locations = cells_column_spanners(spanners = "sw_target")
+  ) |> 
+  tab_spanner(
+    label = "Source df",
+    columns = fav_rating,
+    id = "source_join"
+  ) |> 
+  tab_style(
+    style = cell_fill(color = "#D77D4C"), 
+    locations = cells_column_spanners(spanners = "source_join")
+  ) |> 
+  tab_style(
+    style = cell_text(color = "#eee8d5"),
+    locations = cells_column_spanners(spanners = "source_join")
+  ) |>   
+  tab_spanner(
+    label = "Join key",
+    columns = name,
+    id = "key"
+  ) |> 
+  tab_style(
+    style = cell_fill(color = "#6A57C1"), 
+    locations = cells_column_spanners(spanners = "key")
+  ) |> 
+  tab_style(
+    style = cell_text(color = "#eee8d5"),
+    locations = cells_column_spanners(spanners = "key")
+  ) |>   
+  gtExtras::gt_theme_dark()
+```
+:::
+:::
+
+## anti_join
+
+Identifying what did not match
+
+```{r}
+nomatch_favrating <- anti_join(fav_ratings, starwars) |> 
+  arrange(str_extract(name, "\\w+$")) |> 
+  select(name) |> 
+  rename(fav_rating_key = name)
+
+
+nomatch_starwars <- starwars %>% 
+  filter(str_detect(name, 
+                    regex("3p|palpatine|obi|amidala|leia|d2", 
+                          ignore_case = TRUE))) %>% 
+  select(name) |> 
+  arrange(str_extract(name, "\\w+$")) |> 
+  rename(starwars_key = name)
+
+bind_cols(nomatch_favrating, nomatch_starwars) |> 
+  mutate(regex_modified_key = str_remove_all(str_to_lower(fav_rating_key), " ")) |>
+  gt() |>
+  gtExtras::gt_theme_dark() |> 
+  tab_spanner(
+    label = "Source df",
+    columns = fav_rating_key,
+    id = "source_join"
+  ) |> 
+  tab_style(
+    style = cell_fill(color = "#D77D4C"), 
+    locations = cells_column_spanners(spanners = "source_join")
+  ) |> 
+    data_color(
+    columns = fav_rating_key,
+    palette = "#D77D4C"
+  ) |> 
+  tab_spanner(
+    label = "Target df",
+    columns = starwars_key,
+    id = "target_join"
+  ) |> 
+  tab_style(
+    style = cell_fill(color = "#AFC366"), 
+    locations = cells_column_spanners(spanners = "target_join")
+  ) |> 
+    data_color(
+    columns = starwars_key,
+    palette = "#AFC366"
+  ) |> 
+  tab_spanner(
+    label = "Modified key",
+    columns = regex_modified_key,
+    id = "key"
+  ) |> 
+  tab_style(
+    style = cell_fill(color = "#6A57C1"), 
+    locations = cells_column_spanners(spanners = "key")
+  ) |> 
+  tab_style(
+    style = cell_text(color = "#eee8d5"),
+    locations = cells_column_spanners(spanners = "key")
+  ) |> 
+    data_color(
+    columns = regex_modified_key,
+    palette = "#6A57C1"
+  )
 ```
 
-:::
-:::
+- numeric keys are the best match keys
+- natural language keys are not good match keys
+- regular expressions can normalize keys to some extent
+
