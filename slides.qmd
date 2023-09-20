@@ -40,6 +40,7 @@ editor: visual
 #| code-fold: true
 library(tidyverse)
 library(gt)
+library(gtExtras)
 
 tidyr::relig_income |> 
   gt::gt_preview() |> 
@@ -155,41 +156,82 @@ fav_ratings  |>
 
 ::: columns
 ::: {.column width="50%"}
+538.com
+
+```{r}
+fav_rating_df <- readr::read_csv("data/538_favorability_popularity.csv", skip = 11) |> 
+  gt::gt_preview(top_n = 8) |> 
+  gtExtras::gt_theme_dark() |> 
+    data_color(
+    columns = "fav_rating",
+    palette = "#D77D4C"
+  ) |> 
+  gtExtras::gt_theme_dark() |> 
+    data_color(
+    columns = "name",
+    palette = "#6A57C1"
+  ) |> 
+  tab_spanner(
+    label = "LH join key",
+    columns = "name",
+    id = "my_key"
+  ) |> 
+  tab_style(
+    style = cell_fill(color = "#6A57C1"),
+    locations = cells_column_spanners(spanners = "my_key")
+  ) |>
+  tab_style(
+    style = cell_text(color = "#eee8d5"),
+    locations = cells_column_spanners(spanners = "my_key")
+  ) |>
+    data_color(
+    columns = name,
+    palette = "#6A57C1"
+  )
+fav_rating_df
+```
+:::
+
+::: {.column width="50%"}
 { dplyr::starwars }
 
 ```{r}
-dplyr::starwars |> 
+my_sw_df <- dplyr::starwars |> 
   select(name, height, mass, gender, homeworld) |> 
   gt::gt_preview(top_n = 8) |> 
   gtExtras::gt_theme_dark() |> 
   data_color(
     columns = c(name, height, mass, gender, homeworld),
     palette = "#AFC366"
-  ) 
-```
-:::
-
-::: {.column width="50%"}
-538.com
-
-```{r}
-readr::read_csv("data/538_favorability_popularity.csv", skip = 11) |> 
-  gt::gt_preview(top_n = 8) |> 
-  gtExtras::gt_theme_dark() |> 
+  ) |> 
+  tab_spanner(
+    label = "RH join key",
+    columns = "name",
+    id = "my_key"
+  ) |> 
+  tab_style(
+    style = cell_fill(color = "#6A57C1"),
+    locations = cells_column_spanners(spanners = "my_key")
+  ) |>
+  tab_style(
+    style = cell_text(color = "#eee8d5"),
+    locations = cells_column_spanners(spanners = "my_key")
+  ) |>
     data_color(
-    columns = c(name, fav_rating),
-    palette = "#D77D4C"
-  ) 
+    columns = name,
+    palette = "#6A57C1"
+  )
+my_sw_df
 ```
 :::
 :::
 
 ::: columns
-::: {.column width="50%"}
+::: {.column width="50%" style="font-size: 30%; color: dimgray;"}
+Data gathered then transformed from<br> https://github.com/fivethirtyeight/data/tree/master/star-wars-survey
 :::
 
-::: {.column width="50%" style="text-align: right; font-size: 30%; color: dimgray;"}
-Data gathered then transformed from<br> https://github.com/fivethirtyeight/data/tree/master/star-wars-survey
+::: {.column width="50%"}
 :::
 :::
 
@@ -197,6 +239,7 @@ Data gathered then transformed from<br> https://github.com/fivethirtyeight/data/
 
 ```{r}
 fav_ratings <- readr::read_csv("data/538_favorability_popularity.csv", skip = 11) 
+# fav_ratings <- fav_rating_df
 ```
 
 ::: columns
@@ -277,7 +320,7 @@ fav_ratings |>
 :::
 :::
 
-## anti_join
+## anti_join draft
 
 Identifying what did not match
 
@@ -348,3 +391,211 @@ bind_cols(nomatch_favrating, nomatch_starwars) |>
 -   numeric keys are the best match keys
 -   natural language keys are not good match keys
 -   regular expressions can normalize keys to some extent
+
+## anti_join phase one
+
+Identifying what did not match
+
+```{r}
+nomatch_favrating <- anti_join(fav_ratings, starwars) |> 
+  arrange(str_extract(name, "\\w+$")) |> 
+  select(name) |> 
+  rename(fav_rating_key = name)
+
+
+nomatch_starwars <- starwars %>% 
+  filter(str_detect(name, 
+                    regex("3p|palpatine|obi|amidala|leia|d2", 
+                          ignore_case = TRUE))) %>% 
+  select(name) |> 
+  arrange(str_extract(name, "\\w+$")) |> 
+  rename(starwars_key = name)
+
+key_examples_df <- bind_cols(nomatch_favrating, nomatch_starwars) 
+
+key_examples_df_gt <- key_examples_df |> 
+  gt() |>
+  gtExtras::gt_theme_dark() |> 
+    data_color(
+    columns = fav_rating_key,
+    palette = "#D77D4C"
+  ) |>
+  data_color(
+    columns = starwars_key,
+    palette = "#AFC366"
+  ) |> 
+    tab_spanner(
+    label = "Source df",
+    columns = fav_rating_key,
+    id = "source_join"
+  ) |>
+  tab_style(
+    style = cell_fill(color = "#D77D4C"),
+    locations = cells_column_spanners(spanners = "source_join")
+  ) |> 
+  tab_spanner(
+    label = "Target df",
+    columns = starwars_key,
+    id = "target_join"
+  ) |>
+  tab_style(
+    style = cell_fill(color = "#AFC366"),
+    locations = cells_column_spanners(spanners = "target_join")
+  )
+
+key_examples_df_gt
+
+# bind_cols(nomatch_favrating, nomatch_starwars) |>
+#   mutate(regex_modified_key = str_remove_all(str_to_lower(fav_rating_key), " ")) |>
+#   gt() |>
+#   gtExtras::gt_theme_dark() |>
+# --------------------------------------------
+# tab_spanner(
+#   label = "Source df",
+#   columns = fav_rating_key,
+#   id = "source_join"
+# ) |>
+# tab_style(
+#   style = cell_fill(color = "#D77D4C"),
+#   locations = cells_column_spanners(spanners = "source_join")
+# ) |>
+#   data_color(
+#   columns = fav_rating_key,
+#   palette = "#D77D4C"
+# ) |>
+# tab_spanner(
+#   label = "Target df",
+#   columns = starwars_key,
+#   id = "target_join"
+# ) |>
+# tab_style(
+#   style = cell_fill(color = "#AFC366"),
+#   locations = cells_column_spanners(spanners = "target_join")
+# ) |>
+#   data_color(
+#   columns = starwars_key,
+#   palette = "#AFC366"
+# ) |>
+# tab_spanner(
+#   label = "Modified key",
+#   columns = regex_modified_key,
+#   id = "key"
+# )
+```
+
+## anti_join phase two
+
+```{r}
+key_examples_df_gt <- key_examples_df |> 
+  mutate(regex_modified_key_lh = str_remove_all(str_to_lower(fav_rating_key), "[ \\-]"),
+         .after = fav_rating_key) 
+
+key_examples_df_gt <- key_examples_df_gt |> 
+  gt() |>
+  gtExtras::gt_theme_dark() |> 
+    data_color(
+    columns = fav_rating_key,
+    palette = "#D77D4C"
+  ) |>
+  data_color(
+    columns = starwars_key,
+    palette = "#AFC366"
+  ) |> 
+    tab_spanner(
+    label = "Source df",
+    columns = fav_rating_key,
+    id = "source_join"
+  ) |>
+  tab_style(
+    style = cell_fill(color = "#D77D4C"),
+    locations = cells_column_spanners(spanners = "source_join")
+  ) |> 
+  tab_spanner(
+    label = "Target df",
+    columns = starwars_key,
+    id = "target_join"
+  ) |>
+  tab_style(
+    style = cell_fill(color = "#AFC366"),
+    locations = cells_column_spanners(spanners = "target_join")
+  ) |> 
+  data_color(
+    columns = regex_modified_key_lh,
+    palette = "#6A57C1"
+  )
+
+key_examples_df_gt
+```
+
+
+## anti_join phase three
+
+```{r}
+key_examples_df_gt <- key_examples_df |> 
+  mutate(regex_modified_key_lh = str_remove_all(str_to_lower(fav_rating_key), "[ \\-]"),
+         .after = fav_rating_key) |> 
+  mutate(regex_modified_key_rh = str_remove_all(str_to_lower(starwars_key), "[ \\-]"),
+         .before = starwars_key)
+
+key_examples_df_gt |>
+  gt() |> 
+  gtExtras::gt_theme_dark() |> 
+    data_color(
+    columns = fav_rating_key,
+    palette = "#D77D4C"
+  ) |>
+  data_color(
+    columns = starwars_key,
+    palette = "#AFC366"
+  ) |> 
+    tab_spanner(
+    label = "Source df",
+    columns = fav_rating_key,
+    id = "source_join"
+  ) |>
+  tab_style(
+    style = cell_fill(color = "#D77D4C"),
+    locations = cells_column_spanners(spanners = "source_join")
+  ) |> 
+  tab_spanner(
+    label = "Target df",
+    columns = starwars_key,
+    id = "target_join"
+  ) |>
+  tab_style(
+    style = cell_fill(color = "#AFC366"),
+    locations = cells_column_spanners(spanners = "target_join")
+  ) |> 
+  data_color(
+    columns = c(regex_modified_key_lh, regex_modified_key_rh),
+    palette = "#6A57C1"
+  )
+
+key_examples_df_gt
+```
+
+
+##  practice
+
+```{r}
+key_examples_df <- bind_cols(nomatch_favrating, nomatch_starwars) 
+key_examples_df
+
+key_examples_df |> 
+  mutate(regex_modified_key_lh = str_remove_all(str_to_lower(fav_rating_key), "[ \\-]"),
+         .after = fav_rating_key) 
+
+key_examples_df |> 
+  mutate(regex_modified_key_lh = str_remove_all(str_to_lower(fav_rating_key), "[ \\-]"),
+         .after = fav_rating_key) |> 
+  mutate(regex_modified_key_rh = str_remove_all(str_to_lower(starwars_key), "[ \\-]"),
+         .before = starwars_key)
+
+key_examples_df |> 
+  mutate(regex_modified_key_lh = str_remove_all(str_to_lower(fav_rating_key), "[ \\-]"),
+         .after = fav_rating_key) |> 
+  mutate(regex_modified_key_rh = str_remove_all(str_to_lower(starwars_key), "[ \\-]"),
+         .before = starwars_key) |> 
+  mutate(regex_modified_key_lh == regex_modified_key_rh, .after = regex_modified_key_lh)
+```
+
