@@ -116,11 +116,11 @@ relig_income |>
 
 ::: columns
 ::: {.column width="50%"}
-`tidyr::pivot_wider()`
+`tidyr::pivot_longer()`
 :::
 
 ::: {.column width="50%"}
-`tidyr::pivot_longer()`
+`tidyr::pivot_wider()`
 :::
 :::
 
@@ -420,7 +420,7 @@ key_examples_df_gt <- key_examples_df_gt |>
 key_examples_df_gt
 ```
 
-## `anti_join()` 
+## `anti_join()`
 
 Mutate and regex to modify right-hand side
 
@@ -519,7 +519,7 @@ key_examples_df_gt
 
 ## Hints on keys and regex
 
--  Numeric keys are the best match keys
--  Natural language keys are not good match keys
--  Regular expressions can normalize keys to some extent
--  {fuzzyjoin} package may help
+-   Numeric keys are the best match keys
+-   Natural language keys are not good match keys
+-   Regular expressions can normalize keys to some extent
+-   {fuzzyjoin} package may help
