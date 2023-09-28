@@ -4,7 +4,7 @@
 
 <!-- badges: end -->
 
-Part 4 of **R for Lunch**: [*Introduction to R*](https://intro2r.library.duke.edu/)
+Part 5 of **R for Lunch**: [*Introduction to R*](https://intro2r.library.duke.edu/)
 
 -   [pivot](https://intro2r.library.duke.edu/longer_wider)
 
@@ -30,7 +30,7 @@ orcid: [0000-0002-3600-0972](https://orcid.org/0000-0002-3600-0972)
 
 affiliation:
 
- - name: Duke University Libraries
+-   name: Duke University Libraries
 
 department: [Center for Data & Visualization Sciences](https://library.duke.edu/data)
 
