@@ -76,7 +76,7 @@ In the tidyverse context we have to take into account data masking by indirectly
 -   **Data variables** are columns in a data frame.
 
 ```{r}
-make_scatterplot_with_vars <- function(my_df, my_x, my_y) {
+make_scatterplot_with_vars <- function(my_df) {
   my_df |> 
     ggplot(aes({{my_x}}, {{my_y}})) + 
     geom_point()
@@ -178,5 +178,6 @@ starwars |>
   }
   )) 
   # mutate(my_tidy_model = map(my_model, broom::tidy)) |> 
-  # unnest(my_tidy_model)
+  # unnest(my_tidy_model)|> 
+  # filter(term != "(Intercept)")
 ```
