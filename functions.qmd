@@ -52,7 +52,7 @@ cars |>
 ### Example with simple function
 
 ```{r}
-make_scatterplot <- function(my_df, height, mass) {
+make_scatterplot <- function(my_df) {
   my_df |> 
     ggplot(aes(height, mass)) + 
     geom_point()

@@ -67,7 +67,7 @@ R can feel like a different galaxy
 
 -   A data-first, **functional**, programming language
 
--   **Functional programming languages** mean you don't have to write a for loop
+-   **Functional programming languages** mean you don't have to write FOR loops
 
 -   **Rule of Thumb**: If you compose an expression **three or more times**, write a function
 
@@ -105,9 +105,7 @@ All data are vectors
 ## Many Tidyverse functions are iterable
 
 \
-
-\
-You can imply a for loops
+Many tidyverse functions are "vectorized" and can be invoked with an implied FOR loops
 
 \
 
@@ -118,22 +116,6 @@ library(tidyverse)
 
 starwars |> 
   mutate(name_lc = str_to_lower(name), .after = name)
-```
-
-## Custom Functions
-
-\
-
-```{r}
-#| echo: true
-#| eval: false
-add_numbers <- function(x, y) {
-  x + y
-}
-
-starwars |> 
-  select(where(is.numeric)) |> 
-  mutate(my_sum = add_numbers(height, mass))
 ```
 
 ## What is a FOR Loop
@@ -152,6 +134,28 @@ for (variable in sequence) {
     expression
 }
 ```
+
+## Custom Functions
+
+\
+
+```{r}
+#| echo: true
+#| eval: false
+#| code-line-numbers: "1-3,5,6,8"
+add_numbers <- function(x, y) {
+  x + y
+}
+
+starwars |> 
+  select(where(is.numeric)) |> 
+# mutate(my_sum = height + mass)  
+  mutate(my_sum = add_numbers(height, mass)) 
+```
+
+\
+
+[♠]{style="color: #636363; font-size: 1.25em; display: grid; justify-content: center;"}
 
 ## Environment variables and data variabls
 
@@ -176,6 +180,13 @@ starwars |>
 cars |> 
   make_scatterplot_with_vars(speed, dist)
 ```
+
+## Abstracting the function
+
+In the tidyverse context we have to take into account **data masking** by **indirectly embracing** data variables
+
+-   **Environment** variables show up in the Environment tab
+-   **Data** variables are columns in a data frame
 
 # {Purrr}
 
